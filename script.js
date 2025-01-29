@@ -1,14 +1,17 @@
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://catscrudrender.onrender.com';
+
+// Configure axios defaults
+axios.defaults.baseURL = API_URL;
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 // Fetch all cats
 async function fetchCats() {
     try {
-        const response = await fetch(`${API_URL}/cats/`);
-        const cats = await response.json();
-        displayCats(cats);
+        const response = await axios.get('/cats/');
+        displayCats(response.data);
     } catch (error) {
         console.error('Error fetching cats:', error);
-        alert('Error fetching cats');
+        alert('Error fetching cats: ' + (error.response?.data?.detail || error.message));
     }
 }
 
@@ -48,23 +51,12 @@ document.getElementById('addCatForm').addEventListener('submit', async (e) => {
     };
 
     try {
-        const response = await fetch(`${API_URL}/cats/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(catData)
-        });
-
-        if (response.ok) {
-            e.target.reset();
-            fetchCats();
-        } else {
-            throw new Error('Failed to add cat');
-        }
+        await axios.post('/cats/', catData);
+        e.target.reset();
+        fetchCats();
     } catch (error) {
         console.error('Error adding cat:', error);
-        alert('Error adding cat');
+        alert('Error adding cat: ' + (error.response?.data?.detail || error.message));
     }
 });
 
@@ -72,18 +64,11 @@ document.getElementById('addCatForm').addEventListener('submit', async (e) => {
 async function deleteCat(id) {
     if (confirm('Are you sure you want to delete this cat?')) {
         try {
-            const response = await fetch(`${API_URL}/cats/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                fetchCats();
-            } else {
-                throw new Error('Failed to delete cat');
-            }
+            await axios.delete(`/cats/${id}`);
+            fetchCats();
         } catch (error) {
             console.error('Error deleting cat:', error);
-            alert('Error deleting cat');
+            alert('Error deleting cat: ' + (error.response?.data?.detail || error.message));
         }
     }
 }
@@ -114,23 +99,12 @@ document.getElementById('editCatForm').addEventListener('submit', async (e) => {
     };
 
     try {
-        const response = await fetch(`${API_URL}/cats/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(catData)
-        });
-
-        if (response.ok) {
-            closeEditModal();
-            fetchCats();
-        } else {
-            throw new Error('Failed to update cat');
-        }
+        await axios.put(`/cats/${id}`, catData);
+        closeEditModal();
+        fetchCats();
     } catch (error) {
         console.error('Error updating cat:', error);
-        alert('Error updating cat');
+        alert('Error updating cat: ' + (error.response?.data?.detail || error.message));
     }
 });
 
